@@ -1,1 +1,1 @@
-Ceci est le premier projet git de MKO
+ceci est la partie tests du projet
