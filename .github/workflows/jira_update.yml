@@ -20,7 +20,7 @@ jobs:
       - name: Extract Jira Issue Key
         id: extract_key
         run: |
-          echo "JIRA_KEY=$(echo '${{ steps.get_commit.outputs.message }}' | grep -o -E 'JIRA-[0-9]+' | head -n 1)" >> $GITHUB_ENV
+          echo "JIRA_KEY=$(echo 'SCRUM-53 : exécution de la tâche Créer le formulaire d'inscription.' | grep -o -E 'SCRUM-[0-9]+' | head -n 1)" >> $GITHUB_ENV
 
       - name: Update Jira Task
         if: env.JIRA_KEY != ''
