@@ -3,7 +3,7 @@ name: Update Jira Task and Notify Slack
 on:
   push:
     branches:
-      - main  
+      - main
 
 jobs:
   update-jira:
@@ -29,7 +29,8 @@ jobs:
           RESPONSE=$(curl -k -u "${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }}" \
           -X GET \
           -H "Content-Type: application/json" \
-          "${{ secrets.JIRA_URL }}/rest/api/2/myself")
+          "${{ secrets.JIRA_URL }}/rest/api/2/myself" \
+          -c -)
 
           echo "API Response: $RESPONSE"
 
