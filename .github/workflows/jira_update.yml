@@ -3,7 +3,7 @@ name: Update Jira Task and Notify Slack
 on:
   push:
     branches:
-      - main  # Changez cela selon votre branche principale
+      - main  
 
 jobs:
   update-jira:
@@ -22,14 +22,25 @@ jobs:
         run: |
           echo "JIRA_KEY=$(echo '${{ steps.get_commit.outputs.message }}' | grep -o -E 'SCRUM-[0-9]+' | head -n 1)" >> $GITHUB_ENV
 
+      - name: Get XSRF Token
+        id: get_xsrf_token
+        run: |
+          XSRF_TOKEN=$(curl -k -u "${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }}" \
+          -X GET \
+          -H "Content-Type: application/json" \
+          "${{ secrets.JIRA_URL }}/rest/api/2/myself" \
+          -c - | grep -oP 'atlassian.xsrf.token=\K[^;]+')
+          echo "XSRF_TOKEN=$XSRF_TOKEN" >> $GITHUB_ENV
+
       - name: Update Jira Task
         if: env.JIRA_KEY != ''
         run: |
-          curl -u "${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }}" \
-          -X PUT \
+          curl -k -u "${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }}" \
+          -X POST \
           -H "Content-Type: application/json" \
-          --data '{"fields":{"status":{"id":"10002"}}}' \
-          "${{ secrets.JIRA_URL }}/rest/api/2/issue/${{ env.JIRA_KEY }}"
+          -H "X-Atlassian-Token: ${{ env.XSRF_TOKEN }}" \
+          --data '{"transition":{"id":"31"}}' \
+          "${{ secrets.JIRA_URL }}/rest/api/2/issue/${{ env.JIRA_KEY }}/transitions"
 
       - name: Notify Slack
         if: env.JIRA_KEY != ''
