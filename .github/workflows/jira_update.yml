@@ -28,7 +28,7 @@ jobs:
           curl -u "${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }}" \
           -X PUT \
           -H "Content-Type: application/json" \
-          --data '{"fields":{"status":{"id":"5"}}}' \
+          --data '{"fields":{"status":{"id":"10002"}}}' \
           "${{ secrets.JIRA_URL }}/rest/api/2/issue/${{ env.JIRA_KEY }}"
 
       - name: Notify Slack
