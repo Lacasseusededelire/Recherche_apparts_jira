@@ -1,0 +1,37 @@
+name: Update Jira Task and Notify Slack
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  update-jira:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get commit message
+        id: get_commit
+        run: echo "::set-output name=message::$(git log -1 --pretty=%B)"
+
+      - name: Extract Jira Issue Key
+        id: extract_key
+        run: |
+          echo "JIRA_KEY=$(echo '${{ steps.get_commit.outputs.message }}' | grep -o -E 'JIRA-[0-9]+' | head -n 1)" >> $GITHUB_ENV
+
+      - name: Update Jira Task
+        if: env.JIRA_KEY != ''
+        run: |
+          curl -u "${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }}" \
+          -X PUT \
+          -H "Content-Type: application/json" \
+          --data '{"fields":{"status":{"name":"Done"}}}' \
+          "${{ secrets.JIRA_URL }}/rest/api/2/issue/${{ env.JIRA_KEY }}"
+
+      - name: Notify Slack
+        if: env.JIRA_KEY != ''
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text": "La tâche '${{ env.JIRA_KEY }}' a été marquée comme faite!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
