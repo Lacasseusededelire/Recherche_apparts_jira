@@ -26,11 +26,14 @@ jobs:
         id: get_xsrf_token
         run: |
           echo "Requesting XSRF token..."
-          XSRF_TOKEN=$(curl -k -u "${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }}" \
+          RESPONSE=$(curl -k -u "${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }}" \
           -X GET \
           -H "Content-Type: application/json" \
-          "${{ secrets.JIRA_URL }}/rest/api/2/myself" \
-          | grep -oP 'atlassian.xsrf.token=\K[^;]+')
+          "${{ secrets.JIRA_URL }}/rest/api/2/myself")
+
+          echo "API Response: $RESPONSE"
+
+          XSRF_TOKEN=$(echo "$RESPONSE" | grep -oP 'atlassian.xsrf.token=\K[^;]+')
 
           if [ -z "$XSRF_TOKEN" ]; then
               echo "Failed to retrieve XSRF token"
