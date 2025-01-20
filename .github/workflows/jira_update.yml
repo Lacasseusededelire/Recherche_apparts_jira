@@ -25,11 +25,18 @@ jobs:
       - name: Get XSRF Token
         id: get_xsrf_token
         run: |
+          echo "Requesting XSRF token..."
           XSRF_TOKEN=$(curl -k -u "${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }}" \
           -X GET \
           -H "Content-Type: application/json" \
           "${{ secrets.JIRA_URL }}/rest/api/2/myself" \
-          -c - | grep -oP 'atlassian.xsrf.token=\K[^;]+')
+          | grep -oP 'atlassian.xsrf.token=\K[^;]+')
+
+          if [ -z "$XSRF_TOKEN" ]; then
+              echo "Failed to retrieve XSRF token"
+              exit 1
+          fi
+
           echo "XSRF_TOKEN=$XSRF_TOKEN" >> $GITHUB_ENV
 
       - name: Update Jira Task
